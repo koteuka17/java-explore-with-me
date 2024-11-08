@@ -27,20 +27,6 @@ services:
       interval: 5s
       retries: 10
 
-  ewm-service:
-    build: ./ewm-service
-    image: ewm-service-image
-    container_name: ewm-service-container
-    ports:
-      - "8080:8080"
-    depends_on:
-      - ewm-db
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-db
-      - SPRING_DATASOURCE_USER=postgres
-      - SPRING_DATASOURCE_PASSWORD=root
-      - stats-service.url=http://stats-server:9090
-
   ewm-db:
     image: postgres:16.1
     container_name: ewm-db-container

@@ -27,18 +27,3 @@ services:
       interval: 5s
       retries: 10
 
-  ewm-db:
-    image: postgres:16.1
-    container_name: ewm-db-container
-    ports:
-      - "6542:5432"
-    environment:
-      - POSTGRES_DB=ewm-db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-    healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
-      interval: 5s
-      retries: 10
-

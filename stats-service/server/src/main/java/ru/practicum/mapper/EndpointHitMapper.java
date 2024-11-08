@@ -12,7 +12,7 @@ public class EndpointHitMapper {
                 .app(dto.getApp())
                 .ip(dto.getIp())
                 .uri(dto.getUri())
-                .timestamp(dto.getTimestamp())
+                .created(dto.getCreated())
                 .build();
 
     }
@@ -23,7 +23,7 @@ public class EndpointHitMapper {
                 .app(entity.getApp())
                 .ip(entity.getIp())
                 .uri(entity.getUri())
-                .timestamp(entity.getTimestamp())
+                .created(entity.getCreated())
                 .build();
     }
 }

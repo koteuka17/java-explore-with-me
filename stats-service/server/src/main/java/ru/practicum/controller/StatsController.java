@@ -28,10 +28,11 @@ public class StatsController {
                                                   @RequestParam
                                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
                                                   @RequestParam(required = false) List<String> uris,
-                                                  @RequestParam(defaultValue = "false") Boolean unique) {
+                                                  @RequestParam(defaultValue = "false") Boolean unique,
+                                                  @RequestParam(required = false) Integer limit) {
 
         log.info("Получен запрос GET /stats");
-        return new ResponseEntity<>(service.get(start, end, uris, unique), HttpStatus.OK);
+        return new ResponseEntity<>(service.get(start, end, uris, unique, limit), HttpStatus.OK);
     }
 
 

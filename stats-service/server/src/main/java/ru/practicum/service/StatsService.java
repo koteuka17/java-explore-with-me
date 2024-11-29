@@ -11,4 +11,6 @@ public interface StatsService {
     List<ViewStatsDto> get(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique, Integer limit);
 
     EndpointHitDto save(EndpointHitDto dto);
+
+    boolean isUniqueIp(String ip, String uri);
 }

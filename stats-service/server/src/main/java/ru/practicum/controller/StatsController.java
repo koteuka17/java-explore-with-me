@@ -23,9 +23,9 @@ public class StatsController {
 
 
     @GetMapping("/stats")
-    public ResponseEntity<List<ViewStatsDto>> get(@RequestParam
+    public ResponseEntity<List<ViewStatsDto>> get(@RequestParam(required = false)
                                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                                                  @RequestParam
+                                                  @RequestParam(required = false)
                                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
                                                   @RequestParam(required = false) List<String> uris,
                                                   @RequestParam(defaultValue = "false") Boolean unique,
@@ -40,5 +40,12 @@ public class StatsController {
     public ResponseEntity<EndpointHitDto> save(@RequestBody EndpointHitDto dto) {
         log.info("Получен запрос POST /hit");
         return new ResponseEntity<>(service.save(dto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/hit")
+    public ResponseEntity<Boolean> getUniqueIp(@RequestParam String ip,
+                                               @RequestParam String uri) {
+        log.info("Получен запрос GET /hit");
+        return new ResponseEntity<>(service.isUniqueIp(ip, uri), HttpStatus.OK);
     }
 }

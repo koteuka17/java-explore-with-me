@@ -35,4 +35,12 @@ public class StatsClient extends BaseClient {
     public ResponseEntity<Object> save(EndpointHitDto endpointHit) {
         return post("/hit", endpointHit);
     }
+
+    public ResponseEntity<Object> getUniqueIp(String ip, String uri) {
+        Map<String, Object> parameters = Map.of(
+                "ip", ip,
+                "uri", uri
+        );
+        return get("/hit?ip={ip}&uri={uri}", parameters);
+    }
 }

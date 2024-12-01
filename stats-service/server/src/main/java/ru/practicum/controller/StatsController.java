@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
+import ru.practicum.model.ViewsStatsRequest;
 import ru.practicum.service.StatsService;
 
 import java.time.LocalDateTime;
@@ -20,7 +21,6 @@ import java.util.List;
 public class StatsController {
 
     private final StatsService service;
-
 
     @GetMapping("/stats")
     public ResponseEntity<List<ViewStatsDto>> get(@RequestParam(required = false)
@@ -35,17 +35,26 @@ public class StatsController {
         return new ResponseEntity<>(service.get(start, end, uris, unique, limit), HttpStatus.OK);
     }
 
+    @GetMapping("/stats/count")
+    public ResponseEntity<Integer> get(@RequestParam(required = false)
+                                       @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+                                       @RequestParam(required = false)
+                                       @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+                                       @RequestParam(required = false) List<String> uris,
+                                       @RequestParam(defaultValue = "false") Boolean unique) {
+
+        log.info("Получен запрос GET /stats/count");
+        return new ResponseEntity<>(service.getHits(ViewsStatsRequest.builder()
+                .start(start)
+                .end(end)
+                .uris(uris)
+                .unique(unique)
+                .build()), HttpStatus.OK);
+    }
 
     @PostMapping("/hit")
     public ResponseEntity<EndpointHitDto> save(@RequestBody EndpointHitDto dto) {
         log.info("Получен запрос POST /hit");
         return new ResponseEntity<>(service.save(dto), HttpStatus.CREATED);
-    }
-
-    @GetMapping("/hit")
-    public ResponseEntity<Boolean> getUniqueIp(@RequestParam String ip,
-                                               @RequestParam String uri) {
-        log.info("Получен запрос GET /hit");
-        return new ResponseEntity<>(service.isUniqueIp(ip, uri), HttpStatus.OK);
     }
 }

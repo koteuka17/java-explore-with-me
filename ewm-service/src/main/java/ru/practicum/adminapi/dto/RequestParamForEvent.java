@@ -1,4 +1,4 @@
-package ru.practicum.adminApi.dto;
+package ru.practicum.adminapi.dto;
 
 import lombok.*;
 import ru.practicum.entity.dto.enums.State;

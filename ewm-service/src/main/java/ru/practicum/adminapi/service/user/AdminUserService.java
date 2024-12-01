@@ -1,4 +1,4 @@
-package ru.practicum.adminApi.service.user;
+package ru.practicum.adminapi.service.user;
 
 import ru.practicum.entity.dto.user.NewUserRequest;
 import ru.practicum.entity.dto.user.UserDto;

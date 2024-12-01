@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import ru.practicum.model.ViewsStatsRequest;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -22,25 +22,17 @@ public class StatsClient extends BaseClient {
                         .build());
     }
 
-    public ResponseEntity<Object> getStats(String start, String end, List<String> uris, Boolean unique) {
+    public ResponseEntity<Object> getStats(ViewsStatsRequest request) {
         Map<String, Object> parameters = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique
+                "start", request.getStart(),
+                "end", request.getEnd(),
+                "uris", request.getUris(),
+                "unique", request.getUnique()
         );
-        return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
+        return get("/stats/count?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
     }
 
     public ResponseEntity<Object> save(EndpointHitDto endpointHit) {
         return post("/hit", endpointHit);
-    }
-
-    public ResponseEntity<Object> getUniqueIp(String ip, String uri) {
-        Map<String, Object> parameters = Map.of(
-                "ip", ip,
-                "uri", uri
-        );
-        return get("/hit?ip={ip}&uri={uri}", parameters);
     }
 }

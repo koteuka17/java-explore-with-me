@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.entity.EventStatisticsService;
 import ru.practicum.entity.util.MyPageRequest;
 import ru.practicum.entity.util.UtilMergeProperty;
 import ru.practicum.entity.dto.enums.State;
@@ -24,7 +25,10 @@ import ru.practicum.entity.repository.RequestRepository;
 import ru.practicum.entity.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static ru.practicum.entity.dto.enums.Status.CONFIRMED;
@@ -39,15 +43,22 @@ public class PrivateEventsServiceImpl implements PrivateEventsService {
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final CategoriesRepository categoriesRepository;
+    private final EventStatisticsService statisticsService;
 
     @Override
     public List<EventShortDto> getAll(Long userId, Integer from, Integer size) {
         log.info("Get all events");
         MyPageRequest pageRequest = new MyPageRequest(from, size,
                 Sort.by(Sort.Direction.ASC, "id"));
-        return eventRepository.findAll(pageRequest).stream()
-                .map(EventMapper::toEventShortDto)
-                .toList();
+        Map<Long, Long> eventsViews = new HashMap<>();
+        List<Event> events = eventRepository.findAll(pageRequest).stream().toList();
+        List<EventShortDto> result = new ArrayList<>();
+        for (Event event : events) {
+            Long views = statisticsService.getEventViews(event);
+            eventsViews.put(event.getId(), views);
+            result.add(EventMapper.toEventShortDto(event, eventsViews));
+        }
+        return result;
     }
 
     @Override
@@ -56,7 +67,7 @@ public class PrivateEventsServiceImpl implements PrivateEventsService {
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Событие с id = %s и userId = %s не найдено", eventId, userId)));
         log.info("Get event: {}", event.getId());
-        return EventMapper.toEventFullDto(event);
+        return EventMapper.toEventFullDto(event, statisticsService.getEventViews(event));
     }
 
     @Override
@@ -79,14 +90,13 @@ public class PrivateEventsServiceImpl implements PrivateEventsService {
         event.setPublishedOn(LocalDateTime.now());
         event.setInitiator(userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", userId))));
-        event.setViews(0L);
         try {
             event = eventRepository.save(event);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(e.getMessage(), e);
         }
         log.info("Add event: {}", event.getTitle());
-        return EventMapper.toEventFullDto(event);
+        return EventMapper.toEventFullDto(event, 0L);
     }
 
     @Transactional
@@ -119,7 +129,7 @@ public class PrivateEventsServiceImpl implements PrivateEventsService {
 
         eventRepository.flush();
         log.info("Update event: {}", eventTarget.getTitle());
-        return EventMapper.toEventFullDto(eventTarget);
+        return EventMapper.toEventFullDto(eventTarget, statisticsService.getEventViews(eventTarget));
     }
 
     @Transactional
@@ -134,18 +144,16 @@ public class PrivateEventsServiceImpl implements PrivateEventsService {
         String status = request.getStatus();
 
         if (status.equals(REJECTED.toString())) {
-            if (status.equals(REJECTED.toString())) {
-                boolean isConfirmedRequestExists = requests.stream()
-                        .anyMatch(r -> r.getStatus().equals(CONFIRMED));
-                if (isConfirmedRequestExists) {
-                    throw new ConflictException("Невозможно отклонить подтвержденный запрос");
-                }
-                rejectedRequests = requests.stream()
-                        .peek(r -> r.setStatus(REJECTED))
-                        .map(RequestMapper::toParticipationRequestDto)
-                        .collect(toList());
-                return new EventRequestStatusUpdResult(confirmedRequests, rejectedRequests);
+            boolean isConfirmedRequestExists = requests.stream()
+                    .anyMatch(r -> r.getStatus().equals(CONFIRMED));
+            if (isConfirmedRequestExists) {
+                throw new ConflictException("Невозможно отклонить подтвержденный запрос");
             }
+            rejectedRequests = requests.stream()
+                    .peek(r -> r.setStatus(REJECTED))
+                    .map(RequestMapper::toParticipationRequestDto)
+                    .collect(toList());
+            return new EventRequestStatusUpdResult(confirmedRequests, rejectedRequests);
         }
 
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)

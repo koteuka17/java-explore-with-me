@@ -8,6 +8,7 @@ import ru.practicum.entity.model.Location;
 import ru.practicum.entity.dto.enums.State;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
@@ -57,7 +58,7 @@ public class EventMapper {
                 .build();
     }
 
-    public static EventFullDto toEventFullDto(Event entity) {
+    public static EventFullDto toEventFullDto(Event entity, Long views) {
         return EventFullDto.builder()
                 .id(entity.getId())
                 .annotation(entity.getAnnotation())
@@ -74,11 +75,11 @@ public class EventMapper {
                 .requestModeration(entity.getRequestModeration())
                 .state(entity.getState())
                 .title(entity.getTitle())
-                .views(entity.getViews())
+                .views(views)
                 .build();
     }
 
-    public static EventShortDto toEventShortDto(Event entity) {
+    public static EventShortDto toEventShortDto(Event entity, Map<Long, Long> eventsViews) {
         return EventShortDto.builder()
                 .id(entity.getId())
                 .annotation(entity.getAnnotation())
@@ -88,11 +89,13 @@ public class EventMapper {
                 .initiator(UserMapper.toUserShortDto(entity.getInitiator()))
                 .paid(entity.getPaid())
                 .title(entity.getTitle())
-                .views(entity.getViews())
+                .views(eventsViews.get(entity.getId()))
                 .build();
     }
 
-    public static Set<EventShortDto> toEventShortDtoList(Set<Event> events) {
-        return events.stream().map(EventMapper::toEventShortDto).collect(toSet());
+    public static Set<EventShortDto> toEventShortDtoList(Set<Event> events, Map<Long, Long> eventsViews) {
+        return events.stream()
+                .map(e -> EventMapper.toEventShortDto(e, eventsViews))
+                .collect(toSet());
     }
 }

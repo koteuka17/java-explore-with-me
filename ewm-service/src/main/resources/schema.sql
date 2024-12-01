@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS events(
     request_moderation BOOL,
     state VARCHAR(32) NOT NULL,
     title VARCHAR(120) NOT NULL,
-    views BIGINT,
     CONSTRAINT pk_event PRIMARY KEY (id),
     FOREIGN KEY (category_id)
         REFERENCES categories (category_id) ON DELETE CASCADE,

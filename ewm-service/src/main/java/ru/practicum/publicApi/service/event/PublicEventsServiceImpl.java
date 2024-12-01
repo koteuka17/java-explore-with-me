@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.StatsClient;
+import ru.practicum.entity.EventStatisticsService;
 import ru.practicum.entity.exception.NotFoundException;
 import ru.practicum.entity.model.Event;
 import ru.practicum.publicApi.dto.RequestParamForEvent;
@@ -22,8 +22,10 @@ import ru.practicum.entity.model.EventSearchCriteria;
 import ru.practicum.entity.repository.EventRepository;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ import java.util.Set;
 public class PublicEventsServiceImpl implements PublicEventsService {
     private final EventRepository eventRepository;
     private final StatsClient statsClient;
+    private final EventStatisticsService statisticsService;
 
     @Value("${ewm.service.name}")
     private String serviceName;
@@ -41,10 +44,13 @@ public class PublicEventsServiceImpl implements PublicEventsService {
     public Set<EventShortDto> getAll(RequestParamForEvent param) {
         MyPageRequest pageable = createPageable(param.getSort(), param.getFrom(), param.getSize());
         EventSearchCriteria eventSearchCriteria = createCriteria(param);
-
-        Set<EventShortDto> eventShorts = EventMapper.toEventShortDtoList(eventRepository
-                .findAllWithFilters(pageable, eventSearchCriteria).toSet());
-
+        Set<Event> events = eventRepository.findAllWithFilters(pageable, eventSearchCriteria).toSet();
+        Map<Long, Long> eventViews = new HashMap<>();
+        for (Event event : events) {
+            Long views = statisticsService.getEventViews(event);
+            eventViews.put(event.getId(), views);
+        }
+        Set<EventShortDto> eventShorts = EventMapper.toEventShortDtoList(events, eventViews);
         log.info("Get events list size: {}", eventShorts.size());
         if (eventShorts.isEmpty()) {
             throw new IllegalArgumentException("Событий не найдено");
@@ -61,21 +67,10 @@ public class PublicEventsServiceImpl implements PublicEventsService {
         if (!event.getState().equals(State.PUBLISHED)) {
             throw new NotFoundException(String.format("Событие с id=%d не опубликовано", id));
         }
-
         log.info("Get event: {}", event.getId());
-        if (isUniqueIp(request)) {
-            event.setViews(event.getViews() + 1);
-        }
         saveEndpointHit(request);
         eventRepository.flush();
-        return EventMapper.toEventFullDto(event);
-    }
-
-    private boolean isUniqueIp(HttpServletRequest request) {
-        String ip = request.getRemoteAddr();
-        String uri = request.getRequestURI();
-        ResponseEntity<Object> response = statsClient.getUniqueIp(ip, uri);
-        return Objects.equals(response.getBody(), true);
+        return EventMapper.toEventFullDto(event, statisticsService.getEventViews(event));
     }
 
     private void saveEndpointHit(HttpServletRequest request) {

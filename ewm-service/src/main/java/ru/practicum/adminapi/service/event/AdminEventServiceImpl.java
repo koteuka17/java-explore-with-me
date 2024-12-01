@@ -1,4 +1,4 @@
-package ru.practicum.adminApi.service.event;
+package ru.practicum.adminapi.service.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.adminApi.dto.RequestParamForEvent;
+import ru.practicum.adminapi.dto.RequestParamForEvent;
+import ru.practicum.entity.EventStatisticsService;
 import ru.practicum.entity.util.MyPageRequest;
 import ru.practicum.entity.util.UtilMergeProperty;
 import ru.practicum.entity.dto.enums.AdminStateAction;
@@ -30,6 +31,7 @@ import static java.util.stream.Collectors.toList;
 @Transactional(readOnly = true)
 public class AdminEventServiceImpl implements AdminEventService {
     private final EventRepository eventRepository;
+    private final EventStatisticsService statisticsService;
 
     @Transactional
     @Override
@@ -63,7 +65,7 @@ public class AdminEventServiceImpl implements AdminEventService {
             throw new ConflictException(e.getMessage(), e);
         }
         log.info("Update event: {}", event.getTitle());
-        return EventMapper.toEventFullDto(event);
+        return EventMapper.toEventFullDto(event, statisticsService.getEventViews(event));
     }
 
     @Override
@@ -75,7 +77,7 @@ public class AdminEventServiceImpl implements AdminEventService {
                 param.getUsers(), param.getStates(), param.getCategories(), param.getRangeStart(),
                 param.getRangeEnd(), pageable);
         return events.stream()
-                .map(EventMapper::toEventFullDto)
+                .map(e -> EventMapper.toEventFullDto(e, statisticsService.getEventViews(e)))
                 .collect(toList());
     }
 

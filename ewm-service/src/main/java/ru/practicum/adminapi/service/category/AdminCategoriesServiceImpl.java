@@ -1,4 +1,4 @@
-package ru.practicum.adminApi.service.category;
+package ru.practicum.adminapi.service.category;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

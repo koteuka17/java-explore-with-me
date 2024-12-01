@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ViewStatsShort {
-    private String ip;
     private String uri;
+    private Long hits;
 }

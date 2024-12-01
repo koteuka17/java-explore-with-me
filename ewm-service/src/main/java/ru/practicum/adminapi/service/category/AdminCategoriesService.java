@@ -1,4 +1,4 @@
-package ru.practicum.adminApi.service.category;
+package ru.practicum.adminapi.service.category;
 
 import ru.practicum.entity.dto.category.CategoryDto;
 import ru.practicum.entity.dto.category.NewCategoryDto;

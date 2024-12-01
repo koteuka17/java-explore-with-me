@@ -1,4 +1,4 @@
-package ru.practicum.adminApi.service.compilation;
+package ru.practicum.adminapi.service.compilation;
 
 import ru.practicum.entity.dto.compilation.CompilationDto;
 import ru.practicum.entity.dto.compilation.NewCompilationDto;

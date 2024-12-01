@@ -1,4 +1,4 @@
-package ru.practicum.adminApi.controller;
+package ru.practicum.adminapi.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -8,11 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.adminApi.dto.RequestParamForEvent;
-import ru.practicum.adminApi.service.category.AdminCategoriesService;
-import ru.practicum.adminApi.service.compilation.AdminCompilationService;
-import ru.practicum.adminApi.service.event.AdminEventService;
-import ru.practicum.adminApi.service.user.AdminUserService;
+import ru.practicum.adminapi.dto.RequestParamForEvent;
+import ru.practicum.adminapi.service.category.AdminCategoriesService;
+import ru.practicum.adminapi.service.compilation.AdminCompilationService;
+import ru.practicum.adminapi.service.event.AdminEventService;
+import ru.practicum.adminapi.service.user.AdminUserService;
 import ru.practicum.entity.dto.category.CategoryDto;
 import ru.practicum.entity.dto.category.NewCategoryDto;
 import ru.practicum.entity.dto.compilation.CompilationDto;
@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequestMapping("/admin")
 public class AdminController {
-    public final AdminCategoriesService categoriesService;
+    private final AdminCategoriesService categoriesService;
     private final AdminCompilationService compilationService;
-    public final AdminEventService eventsService;
+    private final AdminEventService eventsService;
     private final AdminUserService userService;
 
     @PostMapping("/categories")

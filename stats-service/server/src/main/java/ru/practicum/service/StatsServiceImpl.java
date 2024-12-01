@@ -8,6 +8,7 @@ import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
 import ru.practicum.mapper.EndpointHitMapper;
 import ru.practicum.mapper.ViewStatsMapper;
+import ru.practicum.model.ViewsStatsRequest;
 import ru.practicum.repository.StatsRepository;
 
 import java.time.LocalDateTime;
@@ -39,15 +40,15 @@ public class StatsServiceImpl implements StatsService {
         }
     }
 
+    @Override
+    public int getHits(ViewsStatsRequest request) {
+        return repository.findUniqueViewStats(request.getStart(), request.getEnd(), request.getUris()).size();
+    }
+
     @Transactional
     @Override
     public EndpointHitDto save(EndpointHitDto dto) {
         dto.setCreated(LocalDateTime.now());
         return EndpointHitMapper.toDto(repository.save(EndpointHitMapper.toEntity(dto)));
-    }
-
-    @Override
-    public boolean isUniqueIp(String ip, String uri) {
-        return repository.findUniqueIp(ip, uri).isEmpty();
     }
 }

@@ -1,6 +1,6 @@
-package ru.practicum.adminApi.service.event;
+package ru.practicum.adminapi.service.event;
 
-import ru.practicum.adminApi.dto.RequestParamForEvent;
+import ru.practicum.adminapi.dto.RequestParamForEvent;
 import ru.practicum.entity.dto.event.EventFullDto;
 import ru.practicum.entity.dto.event.UpdateEventAdminRequest;
 

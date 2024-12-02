@@ -8,7 +8,7 @@ import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
 import ru.practicum.mapper.EndpointHitMapper;
 import ru.practicum.mapper.ViewStatsMapper;
-import ru.practicum.model.ViewsStatsRequest;
+import ru.practicum.ViewsStatsRequest;
 import ru.practicum.repository.StatsRepository;
 
 import java.time.LocalDateTime;

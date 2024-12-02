@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.StatsClient;
 import ru.practicum.entity.model.Event;
-import ru.practicum.model.ViewsStatsRequest;
+import ru.practicum.ViewsStatsRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,12 +21,11 @@ public class EventStatisticsServiceImpl implements EventStatisticsService {
     @Override
     public Long getEventViews(Event event) {
         ViewsStatsRequest request = ViewsStatsRequest.builder()
-                .uris(List.of("/events/" + event.getId()))
+                .uris("/events/" + event.getId())
                 .start(event.getPublishedOn())
                 .end(LocalDateTime.now())
                 .unique(true)
                 .build();
-
         ResponseEntity<Object> response = statsClient.getStats(request);
         return Long.valueOf(Objects.requireNonNull(response.getBody()).toString());
     }

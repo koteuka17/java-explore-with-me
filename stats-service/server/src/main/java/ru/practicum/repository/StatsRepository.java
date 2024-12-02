@@ -17,7 +17,7 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
             "AND (eh.uri IN (?3) OR (?3) is NULL) " +
             "GROUP BY eh.uri, eh.ip " +
             "ORDER BY eh.ip DESC")
-    List<ViewStatsShort> findUniqueViewStats(LocalDateTime start, LocalDateTime end, List<String> uris);
+    List<ViewStatsShort> findUniqueViewStats(LocalDateTime start, LocalDateTime end, String uris);
 
     @Query(" SELECT new ru.practicum.model.ViewStats(eh.app, eh.uri, COUNT(DISTINCT eh.ip)) " +
             "FROM EndpointHit eh " +

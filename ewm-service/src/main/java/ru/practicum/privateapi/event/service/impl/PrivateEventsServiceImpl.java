@@ -255,9 +255,9 @@ public class PrivateEventsServiceImpl implements PrivateEventsService {
     public void deleteCommentById(Long userId, Long eventId, Long comId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", userId)));
-        eventRepository.findByIdAndInitiatorId(eventId, userId)
+        eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format("Событие с id = %s и userId = %s не найдено", eventId, userId)));
+                        String.format("Событие с id = %s не найдено", eventId)));
         Comment comment = commentRepository.findById(comId)
                 .orElseThrow(() -> new NotFoundException(String.format("Комментарий с id=%d не найден", userId)));
         if (!comment.getAuthor().getId().equals(userId)) {

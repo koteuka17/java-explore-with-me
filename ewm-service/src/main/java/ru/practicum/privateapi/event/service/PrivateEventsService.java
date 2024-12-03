@@ -1,5 +1,7 @@
 package ru.practicum.privateapi.event.service;
 
+import ru.practicum.entity.dto.comment.CommentRequestDto;
+import ru.practicum.entity.dto.comment.CommentResponseDto;
 import ru.practicum.entity.dto.event.*;
 import ru.practicum.entity.dto.request.ParticipationRequestDto;
 
@@ -17,4 +19,10 @@ public interface PrivateEventsService {
     EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest eventDto);
 
     EventRequestStatusUpdResult updateRequestStatus(Long userId, Long eventId, EventRequestStatusUpdRequest request);
+
+    CommentResponseDto addComment(Long userId, Long eventId, CommentRequestDto commentDto);
+
+    CommentResponseDto updateCommentById(Long userId, Long eventId, Long comId, CommentRequestDto commentDto);
+
+    void deleteCommentById(Long userId, Long eventId, Long comId);
 }

@@ -7,6 +7,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.entity.EventStatisticsService;
+import ru.practicum.entity.dto.comment.CommentRequestDto;
+import ru.practicum.entity.dto.comment.CommentResponseDto;
+import ru.practicum.entity.mapper.CommentMapper;
+import ru.practicum.entity.model.Comment;
+import ru.practicum.entity.model.User;
+import ru.practicum.entity.repository.*;
 import ru.practicum.entity.util.MyPageRequest;
 import ru.practicum.entity.util.UtilMergeProperty;
 import ru.practicum.entity.dto.enums.State;
@@ -19,10 +25,6 @@ import ru.practicum.entity.mapper.EventMapper;
 import ru.practicum.entity.mapper.RequestMapper;
 import ru.practicum.entity.model.Event;
 import ru.practicum.entity.model.Request;
-import ru.practicum.entity.repository.CategoriesRepository;
-import ru.practicum.entity.repository.EventRepository;
-import ru.practicum.entity.repository.RequestRepository;
-import ru.practicum.entity.repository.UserRepository;
 import ru.practicum.privateapi.event.service.PrivateEventsService;
 
 import java.time.LocalDateTime;
@@ -45,6 +47,7 @@ public class PrivateEventsServiceImpl implements PrivateEventsService {
     private final RequestRepository requestRepository;
     private final CategoriesRepository categoriesRepository;
     private final EventStatisticsService statisticsService;
+    private final CommentRepository commentRepository;
 
     @Override
     public List<EventShortDto> getAll(Long userId, Integer from, Integer size) {
@@ -211,6 +214,57 @@ public class PrivateEventsServiceImpl implements PrivateEventsService {
         eventRepository.flush();
         requestRepository.flush();
         return new EventRequestStatusUpdResult(confirmedRequests, rejectedRequests);
+    }
+
+    @Transactional
+    @Override
+    public CommentResponseDto addComment(Long userId, Long eventId, CommentRequestDto commentDto) {
+        User author = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", userId)));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Событие с id = %s не найдено", eventId)));
+        Comment comment = CommentMapper.toEntity(commentDto, author, event);
+        Comment savedComment = commentRepository.save(comment);
+        log.info("Add comment: {}", comment.getText());
+        return CommentMapper.toDto(savedComment);
+    }
+
+    @Transactional
+    @Override
+    public CommentResponseDto updateCommentById(Long userId, Long eventId, Long comId, CommentRequestDto commentDto) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", userId)));
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Событие с id = %s не найдено", eventId)));
+        Comment comment = commentRepository.findById(comId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Комментарий с id = %s не найден", comId)));
+        if (!comment.getAuthor().getId().equals(userId)) {
+            throw new ConflictException("Изменять комментарий может только его автор");
+        }
+        comment.setText(commentDto.getText());
+        commentRepository.save(comment);
+        log.info("Update comment: {}", comId);
+        return CommentMapper.toDto(comment);
+    }
+
+    @Transactional
+    @Override
+    public void deleteCommentById(Long userId, Long eventId, Long comId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", userId)));
+        eventRepository.findByIdAndInitiatorId(eventId, userId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Событие с id = %s и userId = %s не найдено", eventId, userId)));
+        Comment comment = commentRepository.findById(comId)
+                .orElseThrow(() -> new NotFoundException(String.format("Комментарий с id=%d не найден", userId)));
+        if (!comment.getAuthor().getId().equals(userId)) {
+            throw new ConflictException("Удалять комментарий может только его автор");
+        }
+        commentRepository.deleteById(comId);
+        log.info("Delete comment: {}", comId);
     }
 
     private void checkEventDate(LocalDateTime eventDate) {

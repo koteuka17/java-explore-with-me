@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.entity.dto.comment.CommentRequestDto;
+import ru.practicum.entity.dto.comment.CommentResponseDto;
 import ru.practicum.entity.dto.enums.Status;
 import ru.practicum.entity.dto.event.*;
 import ru.practicum.entity.dto.request.ParticipationRequestDto;
@@ -26,15 +28,15 @@ public class PrivateEventController {
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> getAll(@PathVariable Long userId,
-                                                           @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                                           @RequestParam(defaultValue = "10") @Positive Integer size) {
+                                                      @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                      @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Получен запрос GET /users/{}/events c параметрами: from = {}, size = {}", userId, from, size);
         return new ResponseEntity<>(eventsService.getAll(userId, from, size), HttpStatus.OK);
     }
 
     @GetMapping("/{eventId}")
     public ResponseEntity<EventFullDto> get(@PathVariable Long userId,
-                                                 @PathVariable Long eventId) {
+                                            @PathVariable Long eventId) {
         log.info("Получен запрос GET /users/{}/events/{}", userId, eventId);
         return new ResponseEntity<>(eventsService.get(userId, eventId), HttpStatus.OK);
     }
@@ -48,14 +50,15 @@ public class PrivateEventController {
 
     @PostMapping
     public ResponseEntity<EventFullDto> create(@PathVariable Long userId,
-                                                    @RequestBody @Valid NewEventDto eventDto) {
+                                               @RequestBody @Valid NewEventDto eventDto) {
         log.info("Получен запрос POST /users/{}/events c новым событием: {}", userId, eventDto);
         return new ResponseEntity<>(eventsService.create(userId, eventDto), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> update(@PathVariable Long userId, @PathVariable Long eventId,
-                                                    @RequestBody @Valid UpdateEventUserRequest eventDto) {
+    public ResponseEntity<EventFullDto> update(@PathVariable Long userId,
+                                               @PathVariable Long eventId,
+                                               @RequestBody @Valid UpdateEventUserRequest eventDto) {
         log.info("Получен запрос PATCH /users/{}/events/{eventId}" +
                 " c обновлённым событием id = {}: {}", userId, eventId, eventDto);
         return new ResponseEntity<>(eventsService.update(userId, eventId, eventDto), HttpStatus.OK);
@@ -71,5 +74,34 @@ public class PrivateEventController {
             throw new ConflictException("Status is not validate");
         }
         return new ResponseEntity<>(eventsService.updateRequestStatus(userId, eventId, request), HttpStatus.OK);
+    }
+
+    @PostMapping("/{eventId}/comments")
+    public ResponseEntity<CommentResponseDto> addComment(@PathVariable Long userId,
+                                                         @PathVariable Long eventId,
+                                                         @RequestBody @Valid CommentRequestDto commentDto) {
+        log.info("Получен запрос POST /users/{}/events/{}/comments c новым комментарием: {}", userId, eventId, commentDto);
+        return new ResponseEntity<>(eventsService.addComment(userId, eventId, commentDto), HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{eventId}/comments/{comId}")
+    public ResponseEntity<CommentResponseDto> updateCommentById(@PathVariable Long userId,
+                                                                @PathVariable Long eventId,
+                                                                @PathVariable Long comId,
+                                                                @RequestBody @Valid CommentRequestDto commentDto
+    ) {
+        log.info("Получен запрос PATCH /users/{}/events/{}/comments/{}" +
+                " на обновление комментария: {}", userId, eventId, comId, commentDto);
+        return new ResponseEntity<>(eventsService.updateCommentById(userId, eventId, comId, commentDto), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{eventId}/comments/{comId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCommentById(@PathVariable Long userId,
+                                  @PathVariable Long eventId,
+                                  @PathVariable Long comId) {
+        log.info("Получен запрос DELETE /users/{}/events/{}/comments/{} на удаление комментария: {}",
+                                                                                        userId, eventId, comId, comId);
+        eventsService.deleteCommentById(userId, eventId, comId);
     }
 }

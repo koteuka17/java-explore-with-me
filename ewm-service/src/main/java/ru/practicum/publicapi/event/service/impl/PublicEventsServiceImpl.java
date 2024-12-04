@@ -4,14 +4,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.StatsClient;
 import ru.practicum.entity.EventStatisticsService;
+import ru.practicum.entity.dto.comment.CommentResponseDto;
 import ru.practicum.entity.exception.NotFoundException;
+import ru.practicum.entity.mapper.CommentMapper;
+import ru.practicum.entity.model.Comment;
 import ru.practicum.entity.model.Event;
+import ru.practicum.entity.repository.CommentRepository;
 import ru.practicum.publicapi.dto.RequestParamForEvent;
 import ru.practicum.entity.util.MyPageRequest;
 import ru.practicum.entity.dto.enums.State;
@@ -24,6 +29,7 @@ import ru.practicum.publicapi.event.service.PublicEventsService;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +42,7 @@ public class PublicEventsServiceImpl implements PublicEventsService {
     private final EventRepository eventRepository;
     private final StatsClient statsClient;
     private final EventStatisticsService statisticsService;
+    private final CommentRepository commentRepository;
 
     @Value("${ewm.service.name}")
     private String serviceName;
@@ -72,6 +79,28 @@ public class PublicEventsServiceImpl implements PublicEventsService {
         saveEndpointHit(request);
         eventRepository.flush();
         return EventMapper.toEventFullDto(event, statisticsService.getEventViews(event));
+    }
+
+    @Override
+    public CommentResponseDto getCommentById(Long eventId, Long comId) {
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Событие с id = %s не найдено", eventId)));
+        Comment comment = commentRepository.findById(comId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Комментарий с id = %s не найден", comId)));
+        log.info("Get event comment: {}", comment.getId());
+        return CommentMapper.toDto(comment);
+    }
+
+    @Override
+    public List<CommentResponseDto> getComments(Long eventId, Integer from, Integer size) {
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Событие с id = %s не найдено", eventId)));
+        List<Comment> comments = commentRepository.findAllByEventId(eventId, PageRequest.of(from, size));
+        log.info("Get comments list size: {}", comments.size());
+        return CommentMapper.toDtoList(comments);
     }
 
     private void saveEndpointHit(HttpServletRequest request) {

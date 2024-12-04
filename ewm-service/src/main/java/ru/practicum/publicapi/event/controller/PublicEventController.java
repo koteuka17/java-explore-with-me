@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.entity.dto.comment.CommentResponseDto;
 import ru.practicum.entity.dto.event.EventFullDto;
 import ru.practicum.entity.dto.event.EventShortDto;
 import ru.practicum.publicapi.dto.RequestParamForEvent;
@@ -58,5 +59,22 @@ public class PublicEventController {
     public ResponseEntity<EventFullDto> get(@PathVariable Long id, HttpServletRequest request) {
         log.info("Получен запрос GET /events/{}", id);
         return new ResponseEntity<>(eventsService.get(id, request), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<CommentResponseDto>> getEventComments(
+                                                         @PathVariable Long id,
+                                                         @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                         @RequestParam(defaultValue = "10") @Positive int size
+    ) {
+        log.info("Получен запрос GET /events/{}/comments", id);
+        return new ResponseEntity<>(eventsService.getComments(id, from, size), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/comments/{comId}")
+    public ResponseEntity<CommentResponseDto> getCommentById(@PathVariable Long id,
+                                                             @PathVariable Long comId) {
+        log.info("Получен запрос GET /events/{}/comments/{}", id, comId);
+        return new ResponseEntity<>(eventsService.getCommentById(id, comId), HttpStatus.OK);
     }
 }

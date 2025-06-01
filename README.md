@@ -6,6 +6,7 @@
 <br>Случалось ли вам планировать мероприятие, искать информацию или договариваться с людьми? 
 <br>С данным приложением Вы легко сможете предложить или присоединиться к любому событию - от выставки до похода в кино.
 
+---
 ### Приложение включает в себя сервисы:
 
 - **Основной сервис — содержит всё необходимое для работы.**
@@ -23,3 +24,22 @@
 
 - **Фича "Комментарии".**
     - Возможность оставлять комментарии к событиям и модерировать их.
+
+---
+### Жизненный цикл "события":
+1. Создание события.
+2. Ожидание публикации (В статус ожидания публикации событие переходит сразу после создания).
+3. Публикация (В это состояние событие переводит администратор).
+4. Отмена публикации (В это состояние событие переходит в двух случаях. Первый — если администратор решил, что его нельзя публиковать. Второй — когда инициатор события решил отменить его на этапе ожидания публикации).
+
+---
+### Стек технологий
++ ![Java](https://img.shields.io/badge/Java-red?logo=javacofee&logoColor=white)
++ ![Spring Boot](https://img.shields.io/badge/Spring_Boot-green?logo=springboot&logoColor=white)
++ ![Hibernate](https://img.shields.io/badge/Hibernate-brown?logo=hibernate&logoColor=white)
++ ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue?logo=postgresql&logoColor=white)
++ ![Docker](https://img.shields.io/badge/Docker-blue?logo=docker&logoColor=white)
++ ![Maven](https://img.shields.io/badge/Maven-black?logo=apachemaven&logoColor=white)
++ ![Lombok](https://img.shields.io/badge/Lombok-pink?logo=lombok&logoColor=white)
++ ![Postman](https://img.shields.io/badge/Postman-orange?logo=postman&logoColor=white)
++ ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ-IDEA?logoColor=white&color=%233A0088)
